@@ -1,0 +1,27 @@
+services:
+
+  nginx:
+    restart: always
+    image: nginx:1.25-alpine
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - static_volume:/app/backend/server/static
+    depends_on:
+      - wsgiserver
+
+  wsgiserver:
+    build:
+      context: .
+      dockerfile: ./docker/backend/Dockerfile
+    entrypoint: /app/docker/backend/wsgi-entrypoint.sh
+    volumes:
+      - static_volume:/app/backend/server/static
+    expose:
+      - "8000"
+    environment:
+      - DJANGO_SETTINGS_MODULE=server.settings
+
+volumes:
+  static_volume: {}
